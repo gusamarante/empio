@@ -27,6 +27,7 @@ setup(
         'pandas',
         'scikit-learn',
         'statsmodels',
+        'xlogit',
     ],
     keywords=[
         'empirical industrial organization',
