@@ -2,6 +2,7 @@ from empio.data import load_restaurant
 from xlogit import MultinomialLogit
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 data = load_restaurant(data_format="long")
 
@@ -37,6 +38,15 @@ model.fit(
 )
 print(model.summary())
 coeffs = pd.Series(index=vars_x, data=model.coeff_)
+model_output = pd.DataFrame(
+    index=vars_x,
+    data={
+        "Coeff": model.coeff_,
+        "Std Error": model.stderr,
+        "Z-stat": model.zvalues,
+        "p-values": model.pvalues,
+    },
+)
 
 
 # ================================
@@ -68,5 +78,14 @@ for rest in model.alternatives:
         el[rest] = - coeffs.loc['cost'] * wrt_cost / probs[wrt]
 
 
-# TODO report qunatiles of marginal effects and elasticities
-# TODO chart of elasticity per alternative
+# ==============================
+# ===== Chart Elasticities =====
+# ==============================
+df2plot = el[["Freebirds", "CafeEccell"]].stack().reset_index().rename({"level_1": "restaurant", 0: "elasticity"}, axis=1)
+df2plot = df2plot[df2plot["restaurant"].isin(('Freebirds', 'CafeEccell'))]
+
+
+sns.displot(df2plot, x="elasticity", hue="restaurant", kind="kde")
+plt.tight_layout()
+plt.savefig('/Users/gustavoamarante/Dropbox/Aulas/Doutorado - Econometria Estrutural/Problem Set 1/figures/Q1 A - KDE of elasticities.pdf')
+plt.show()
