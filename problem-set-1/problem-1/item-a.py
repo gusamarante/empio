@@ -1,6 +1,7 @@
 from empio.data import load_restaurant
 from xlogit import MultinomialLogit
 import pandas as pd
+import matplotlib.pyplot as plt
 
 data = load_restaurant(data_format="long")
 
@@ -49,21 +50,23 @@ _, probs = model.predict(
     alts=data["restaurant"],
     return_proba=True,
 )
-probs = pd.DataFrame(data=probs, columns=model.alternatives)
+probs = pd.DataFrame(data=probs, columns=model.alternatives, index=data['family.id'].unique())
+probs.index.name = "family.id"
 
 # marginal effects and elasticities
 me = pd.DataFrame(columns=model.alternatives)
 el = pd.DataFrame(columns=model.alternatives)
-wrt = "Freebirds"
+wrt = "Freebirds"  # plays the role of index j
+wrt_cost = data.set_index(['family.id', 'restaurant']).xs(wrt, level=1)['cost']
 for rest in model.alternatives:
 
     if rest == wrt:
-        me[rest] = 1
+        me[rest] = coeffs.loc['cost'] * probs[wrt] * (1 - probs[wrt])
+        el[rest] = coeffs.loc['cost'] * wrt_cost / probs[wrt]
     else:
-        me[rest] = coeffs.loc['cost']
+        me[rest] = - coeffs.loc['cost'] * probs[wrt] * probs[rest]
+        el[rest] = - coeffs.loc['cost'] * wrt_cost / probs[wrt]
 
 
-# TODO report qunatiles of elasticities
+# TODO report qunatiles of marginal effects and elasticities
 # TODO chart of elasticity per alternative
-
-a = 1
