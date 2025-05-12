@@ -84,7 +84,6 @@ for rest in model.alternatives:
 df2plot = el[["Freebirds", "CafeEccell"]].stack().reset_index().rename({"level_1": "restaurant", 0: "elasticity"}, axis=1)
 df2plot = df2plot[df2plot["restaurant"].isin(('Freebirds', 'CafeEccell'))]
 
-
 sns.displot(df2plot, x="elasticity", hue="restaurant", kind="kde")
 plt.tight_layout()
 plt.savefig('/Users/gustavoamarante/Dropbox/Aulas/Doutorado - Econometria Estrutural/Problem Set 1/figures/Q1 A - KDE of elasticities.pdf')
