@@ -3,7 +3,12 @@ from xlogit import MultinomialLogit
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import getpass
 
+
+username = getpass.getuser()
+
+# Read data
 data = load_restaurant(data_format="long")
 
 # add alternative specific constants (asc)
@@ -86,5 +91,5 @@ df2plot = df2plot[df2plot["restaurant"].isin(('Freebirds', 'CafeEccell'))]
 
 sns.displot(df2plot, x="elasticity", hue="restaurant", kind="kde")
 plt.tight_layout()
-plt.savefig('/Users/gustavoamarante/Dropbox/Aulas/Doutorado - Econometria Estrutural/Problem Set 1/figures/Q1 A - KDE of elasticities.pdf')
+plt.savefig(f'/Users/{username}/Dropbox/Aulas/Doutorado - Econometria Estrutural/Problem Set 1/figures/Q1 A - KDE of elasticities.pdf')
 plt.show()
