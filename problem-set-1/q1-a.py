@@ -77,10 +77,10 @@ for rest in model.alternatives:
 
     if rest == wrt:
         me[rest] = coeffs.loc['cost'] * probs[wrt] * (1 - probs[wrt])
-        el[rest] = coeffs.loc['cost'] * wrt_cost / probs[wrt]
+        el[rest] = coeffs.loc['cost'] * wrt_cost * (1 - probs[wrt])
     else:
         me[rest] = - coeffs.loc['cost'] * probs[wrt] * probs[rest]
-        el[rest] = - coeffs.loc['cost'] * wrt_cost / probs[wrt]
+        el[rest] = - coeffs.loc['cost'] * wrt_cost * probs[wrt]
 
 
 # ==============================
@@ -89,7 +89,8 @@ for rest in model.alternatives:
 df2plot = el[["Freebirds", "CafeEccell"]].stack().reset_index().rename({"level_1": "restaurant", 0: "elasticity"}, axis=1)
 df2plot = df2plot[df2plot["restaurant"].isin(('Freebirds', 'CafeEccell'))]
 
-sns.displot(df2plot, x="elasticity", hue="restaurant", kind="kde")
+ax = sns.displot(df2plot, x="elasticity", hue="restaurant", kind="kde")
+sns.move_legend(ax, "upper center")
 plt.tight_layout()
 plt.savefig(f'/Users/{username}/Dropbox/PhD/Econometria Estrutural/Problem Set 1/figures/Q1 A - KDE of elasticities.pdf')
 plt.show()
