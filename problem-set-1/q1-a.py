@@ -39,7 +39,8 @@ model.fit(
     y=data["choice"],
     varnames=vars_x,
     ids=data["family.id"],
-    alts=data["restaurant"]
+    alts=data["restaurant"],
+
 )
 print(model.summary())
 coeffs = pd.Series(index=vars_x, data=model.coeff_)
