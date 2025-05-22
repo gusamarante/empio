@@ -71,7 +71,11 @@ res = minimize(
     options={'disp': True},
 )
 
-print(res.x)
+
+# ===================
+# ===== LR test =====
+# ===================
+llmax = - res.fun
 
 # TODO compute std err, z-stats, p-values
 # TODO LR test
