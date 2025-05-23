@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
-from scipy.stats import norm
+from scipy.stats import norm, chi2
 from empio.data import load_restaurant
 
 
@@ -156,4 +156,7 @@ print(ll)
 # ===================
 # ===== LR Test =====
 # ===================
-
+lr_stat = - 2 * (ll_res - ll_irr)
+pval_lr = 1 - chi2.cdf(lr_stat, df=len(vars_x_irr) - len(vars_x_res))
+print(f"df={len(vars_x_irr) - len(vars_x_res)}")
+print(pval_lr)
