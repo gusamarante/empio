@@ -23,27 +23,28 @@ class BinaryLogit(GMM):
 
         endog = self.endog
         exog = self.exog
+        inst = self.instrument
 
         # Difference in representative utility
         # V_car - V_bus
-        util_dif = alpha + beta * data['cost.car'] + g_car * data['time.car'] - g_bus * data['time.bus']
+        util_dif = alpha + beta * exog[:, 1] + g_car * exog[:, 2] - g_bus * exog[:, 3]
 
         prob = 1 / (1 + np.exp(- util_dif))
 
-        resid = data['asc_car'] - prob
+        resid = endog - prob
 
         # Moment matrix
-        X = pd.concat([pd.Series(np.ones(resid.shape[0]), name='cons'), data[['cost.car', 'time.car', 'time.bus']]], axis=1)
-        moms = X.mul(resid, axis=0)
+        moms = inst.mul(pd.Series(resid), axis=0)
 
         return moms
 
 var_cols = ['const', 'cost.car', 'time.car', 'time.bus']
+inst_cols = ['const', 'price_gas', 'snowfall', 'construction', 'bus_detour']
 p0 = np.array([0, 0, 0, 0])
 bl = BinaryLogit(
     endog=data['asc_car'],
     exog=data[var_cols],
-    instrument=data[var_cols],
+    instrument=data[inst_cols],
 ).fit(p0)
 print(bl.summary())
 
