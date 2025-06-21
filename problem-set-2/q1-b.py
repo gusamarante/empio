@@ -28,14 +28,11 @@ class BinaryLogit(GMM):
         # Difference in representative utility
         # V_car - V_bus
         util_dif = alpha + beta * exog[:, 1] + g_car * exog[:, 2] - g_bus * exog[:, 3]
-
         prob = 1 / (1 + np.exp(- util_dif))
-
         resid = endog - prob
 
         # Moment matrix
         moms = inst.mul(pd.Series(resid), axis=0)
-
         return moms
 
 var_cols = ['const', 'cost.car', 'time.car', 'time.bus']
