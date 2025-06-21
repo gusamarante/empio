@@ -7,35 +7,24 @@ pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
 
-def load_restaurant(data_format="wide"):
+def load_camping(data_format="long"):
     """
-    Simulated data on the restaurant choices of 300 families
+    camping.csv variables
+
+    camper_id: individual identifier
+    park_id: state park identifier
+    park: state park
+    visit: binary indicator (0 or 1) for chosen park
+    mountain: binary indicator (0 or 1) if park is in the mountains
+    beach: binary indicator (0 or 1) if park is on the beach
+    cost: cost (in dollars) to drive to and from the state park, park for three days, and camp for two nights
+    time: time (in minutes) to drive to and from the state park
     """
     base_dir = os.path.dirname(__file__)
-    df = pd.read_csv(os.path.join(base_dir, "restaurant_ps1.csv"))
+    df = pd.read_csv(os.path.join(base_dir, "camping.csv"))
+    df = df.rename({"visit": "choice"}, axis=1)
 
-    if data_format == "wide":
-        return df
-    elif data_format == "long":
-        df = wide_to_long(
-            dataframe=df,
-            id_col="family.id",
-            alt_list=[
-                'CafeEccell',
-                'Christophers',
-                'Freebirds',
-                'LosNortenos',
-                'MadCows',
-                'MamasPizza',
-                'WingsNmore',
-            ],
-            varying=[
-                'cost',
-                'distance',
-            ],
-            alt_name='restaurant',
-            sep='.',
-        )
+    if data_format == "long":
         return df
     else:
         raise TypeError("Invalid data format")
@@ -83,3 +72,42 @@ def load_commute(data_format="wide"):
         return df
     else:
         raise TypeError("Invalid data format")
+
+
+def load_restaurant(data_format="wide"):
+    """
+    Simulated data on the restaurant choices of 300 families
+    """
+    base_dir = os.path.dirname(__file__)
+    df = pd.read_csv(os.path.join(base_dir, "restaurant_ps1.csv"))
+
+    if data_format == "wide":
+        return df
+    elif data_format == "long":
+        df = wide_to_long(
+            dataframe=df,
+            id_col="family.id",
+            alt_list=[
+                'CafeEccell',
+                'Christophers',
+                'Freebirds',
+                'LosNortenos',
+                'MadCows',
+                'MamasPizza',
+                'WingsNmore',
+            ],
+            varying=[
+                'cost',
+                'distance',
+            ],
+            alt_name='restaurant',
+            sep='.',
+        )
+        return df
+    else:
+        raise TypeError("Invalid data format")
+
+
+if __name__ == "__main__":
+    data = load_camping()
+    print(data)
