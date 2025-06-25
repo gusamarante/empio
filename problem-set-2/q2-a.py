@@ -64,7 +64,7 @@ def sloglike(params, data):
     sll = (np.log(choice_probs) * actual_choices).sum().sum()
     return - sll
 
-theta0 = np.array([0.0, 0.0, 0.1, 0.0, 0.1])
+theta0 = np.array([-0.02, -0.01, 0.05, -0.6, 0.1])
 # test_sll = sloglike(theta0, camp_data)
 # print(test_sll)
 
@@ -72,7 +72,7 @@ theta0 = np.array([0.0, 0.0, 0.1, 0.0, 0.1])
 res = minimize(
     fun=lambda x: sloglike(x, camp_data),
     x0=theta0,
-    method='BFGS',
+    method='SLSQP',
     options={'disp': True},
     bounds=(
         (None, None),
