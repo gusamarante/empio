@@ -1,17 +1,15 @@
-# TODO match random numbers with manu
-# TODO run the canned version of the model
-
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from empio.data import load_camping
+from scipy.optimize import minimize, Bounds
 
 
 np.random.seed(703)
 
 camp_data = load_camping()
 
-n_draws = 2  # number of random draws  # TODO make this big
+n_draws = 5  # number of random draws  # TODO make this big
 n_rand_coeff = 2  # number of random coefficients
 n_ids = camp_data['camper_id'].max()  # number of individuals
 
@@ -66,7 +64,27 @@ def sloglike(params, data):
     sll = (np.log(choice_probs) * actual_choices).sum().sum()
     return - sll
 
-theta = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
-res = sloglike(theta, camp_data)
-print(res)
+theta0 = np.array([0.0, 0.0, 0.1, 0.0, 0.1])
+# test_sll = sloglike(theta0, camp_data)
+# print(test_sll)
+
+
+res = minimize(
+    fun=lambda x: sloglike(x, camp_data),
+    x0=theta0,
+    method='BFGS',
+    options={'disp': True},
+    bounds=(
+        (None, None),
+        (None, None),
+        (0, None),
+        (None, None),
+        (0, None),
+    ),
+)
+print("Beta C", res.x[0])
+print("Mu T", res.x[1])
+print("Sigma2 T", res.x[2])
+print("Mu M", res.x[3])
+print("Sigma2 M", res.x[4])
 
