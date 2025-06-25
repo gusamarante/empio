@@ -2,38 +2,71 @@
 # TODO run the canned version of the model
 
 import numpy as np
+import pandas as pd
+from tqdm import tqdm
 from empio.data import load_camping
 
 
 np.random.seed(703)
 
-data = load_camping()
+camp_data = load_camping()
 
-n_draws = 10  # number of random draws  # TODO make this big
+n_draws = 2  # number of random draws  # TODO make this big
 n_rand_coeff = 2  # number of random coefficients
-n_ids = data['camper_id'].max()  # number of individuals
+n_ids = camp_data['camper_id'].max()  # number of individuals
 
 coeff_draws = n_ids * n_draws  # per parameter
-
 draws = np.random.normal(size=(coeff_draws, n_rand_coeff))
+draws = pd.DataFrame(
+    {
+        'betac': 1,
+        'betat': draws[:, 0],
+        'betam': draws[:, 1],
+    },
+    index=pd.MultiIndex.from_product(
+        [range(1, n_ids + 1), range(1, n_draws + 1)],
+        names=['camper_id', 'beta_id'],
+    ),
+)
 
-def choice_prob(params):
-    # TODO this is for a single camper
+
+def sloglike(params, data):
 
     betac = params[0]
-    mut = params[0]
-    sig2t = params[0]
-    mum = params[0]
-    sig2m = params[0]
+    mut = params[1]
+    sig2t = params[2]
+    mum = params[3]
+    sig2m = params[4]
 
-    # TODO transform the standard normal draws into with their parameters
-    # TODO compute representative utility for every alternative for every draw
-    # TODO Calculate the conditional choice probability for every alternative for each draw
-    # TODO Calculate the simulated choice probability for every alternative as the mean over all draws
+    # transform the standard normal draws into with their parameters
+    betas = draws.copy()
+    betas['betac'] = betas['betac'] * betac
+    betas['betat'] = betas['betat'] * np.sqrt(sig2t) + mut
+    betas['betam'] = betas['betam'] * np.sqrt(sig2m) + mum
 
-def sloglike(params):
+    results = pd.DataFrame(
+        columns=data['park'].unique(),
+        index=draws.index,
+    )
+    for cid in tqdm(data['camper_id'].unique()):
 
-    # TODO Get the choice_prob for each camper
-    # TODO Sum the log of the simulated choice probability for each camper’s chosen alternative.
-    # TODO Return the negative of the log of simulated likelihood
-     pass
+        aux_data = data[data['camper_id'] == cid]
+
+        for bid in betas.loc[cid].index:
+            p = np.exp((betas.loc[(cid, bid), 'betac'] * aux_data['cost'] + betas.loc[(cid, bid), 'betat'] * aux_data['time'] + betas.loc[(cid, bid), 'betam'] * aux_data['mountain']).values)
+            p = pd.Series(
+                data = p / p.sum(),
+                index=aux_data['park'],
+            )
+            results.loc[(cid, bid)] = p
+
+    choice_probs = results.groupby('camper_id').mean().astype(float)
+    actual_choices = data.pivot(index='camper_id', columns='park', values='choice')[choice_probs.columns]
+
+    sll = (np.log(choice_probs) * actual_choices).sum().sum()
+    return - sll
+
+theta = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
+res = sloglike(theta, camp_data)
+print(res)
+

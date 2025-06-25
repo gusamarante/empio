@@ -28,6 +28,7 @@ setup(
         'scikit-learn',
         'seaborn',
         'statsmodels',
+        'tqdm',
         'xlogit',
     ],
     keywords=[
